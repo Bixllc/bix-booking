@@ -23,7 +23,7 @@ export function GettingStartedCard() {
   if (welcomeOpen || tourActive || checklistDismissed) return null
 
   return (
-    <div className="fixed bottom-6 right-6 z-30 w-80 rounded-card bg-surface shadow-2xl border border-border animate-scrIn">
+    <div className="fixed inset-x-4 bottom-4 sm:inset-x-auto sm:right-6 sm:bottom-6 z-30 sm:w-80 rounded-card bg-surface shadow-2xl border border-border animate-scrIn">
       <div className="flex items-center gap-3 p-4">
         <ProgressRing progress={doneCount / TOUR_STEPS.length} label={`${doneCount}/${TOUR_STEPS.length}`} />
         <div className="min-w-0 flex-1">
@@ -49,7 +49,7 @@ export function GettingStartedCard() {
       </div>
 
       {checklistOpen && (
-        <div className="border-t border-border px-2 pb-2">
+        <div className="border-t border-border px-2 pb-2 max-h-96 overflow-y-auto">
           {TOUR_STEPS.map((step) => {
             const done = completed.has(step.id)
             return (

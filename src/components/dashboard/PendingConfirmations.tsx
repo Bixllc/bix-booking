@@ -3,7 +3,7 @@ import { confirmations } from '../../lib/mock'
 
 export function PendingConfirmations() {
   return (
-    <div className="rounded-card bg-surface border border-border p-5 animate-scrIn">
+    <div className="rounded-card bg-surface border border-border p-4 sm:p-5 animate-scrIn">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-base2 font-bold text-ink">Pending confirmations</h2>
         <span className="rounded-chip bg-gold-soft/40 px-2 py-0.5 text-[11px] font-mono font-semibold text-gold">

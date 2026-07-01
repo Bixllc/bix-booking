@@ -22,23 +22,23 @@ const staff: StaffMember[] = [
 export function Staff() {
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-ink">Staff</h1>
           <p className="text-body text-muted mt-0.5">Chauffeurs and crew who get assigned to bookings.</p>
         </div>
         <button
           type="button"
-          className="flex items-center gap-2 rounded-btn bg-ink-grad px-4 py-2.5 text-label font-semibold text-white hover:brightness-110 transition"
+          className="self-start sm:self-auto flex items-center gap-2 rounded-btn bg-ink-grad px-4 py-2.5 text-label font-semibold text-white hover:brightness-110 transition"
         >
           <Plus size={16} strokeWidth={2} />
           Invite team member
         </button>
       </div>
 
-      <div className="grid grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
         {staff.map((s) => (
-          <div key={s.id} className="rounded-card bg-surface border border-border p-5 flex items-center gap-3.5 animate-scrIn">
+          <div key={s.id} className="rounded-card bg-surface border border-border p-4 sm:p-5 flex items-center gap-3.5 animate-scrIn">
             <div className={`size-11 shrink-0 rounded-avatar flex items-center justify-center text-[12px] font-bold ${s.color}`}>
               {s.initials}
             </div>

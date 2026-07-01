@@ -25,18 +25,18 @@ export function Payments() {
         <p className="text-body text-muted mt-0.5">Deposits, payouts, and policies for Big Cadi VIP.</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-5">
-        <div className="rounded-card bg-surface border border-border p-5 animate-scrIn">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
+        <div className="rounded-card bg-surface border border-border p-4 sm:p-5 animate-scrIn">
           <span className="text-body text-muted">Available balance</span>
           <div className="text-stat text-ink mt-3">$14,920</div>
           <p className="text-[12px] text-muted mt-1">Next payout Jul 3</p>
         </div>
-        <div className="rounded-card bg-surface border border-border p-5 animate-scrIn">
+        <div className="rounded-card bg-surface border border-border p-4 sm:p-5 animate-scrIn">
           <span className="text-body text-muted">This month</span>
           <div className="text-stat text-ink mt-3">$62,180</div>
           <p className="text-[12px] text-emerald-600 mt-1">+18% vs last month</p>
         </div>
-        <div className="rounded-card bg-surface border border-border p-5 flex flex-col gap-3 animate-scrIn">
+        <div className="rounded-card bg-surface border border-border p-4 sm:p-5 flex flex-col gap-3 animate-scrIn">
           <div className="flex items-center gap-2.5">
             <div className="size-9 rounded-avatar bg-canvas border border-border flex items-center justify-center">
               <CreditCard size={16} strokeWidth={1.7} className="text-gold" />
@@ -52,11 +52,11 @@ export function Payments() {
         </div>
       </div>
 
-      <div className="rounded-card bg-surface border border-border p-5 animate-scrIn">
+      <div className="rounded-card bg-surface border border-border p-4 sm:p-5 animate-scrIn">
         <h2 className="text-base2 font-bold text-ink mb-4">Recent transactions</h2>
         <div className="flex flex-col divide-y divide-border">
           {transactions.map((t) => (
-            <div key={t.id} className="flex items-center gap-4 py-3.5">
+            <div key={t.id} className="flex items-center gap-3 sm:gap-4 py-3.5">
               <div
                 className={[
                   'size-9 shrink-0 rounded-avatar flex items-center justify-center',

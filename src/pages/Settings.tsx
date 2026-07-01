@@ -19,9 +19,9 @@ export function Settings() {
         <p className="text-body text-muted mt-0.5">Workspace details and booking policies.</p>
       </div>
 
-      <div className="rounded-card bg-surface border border-border p-5 animate-scrIn">
+      <div className="rounded-card bg-surface border border-border p-4 sm:p-5 animate-scrIn">
         <h2 className="text-base2 font-bold text-ink mb-4">General</h2>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {fields.map((f) => (
             <label key={f.label} className="flex flex-col gap-1.5">
               <span className="text-[12px] font-medium text-muted">{f.label}</span>
@@ -34,7 +34,7 @@ export function Settings() {
         </div>
       </div>
 
-      <div className="rounded-card bg-surface border border-border p-5 animate-scrIn">
+      <div className="rounded-card bg-surface border border-border p-4 sm:p-5 animate-scrIn">
         <h2 className="text-base2 font-bold text-ink mb-4">Booking policies</h2>
         <div className="flex flex-col divide-y divide-border">
           {toggles.map((t) => (
@@ -53,7 +53,7 @@ export function Settings() {
         </div>
       </div>
 
-      <div className="rounded-card bg-surface border border-rose-100 p-5 animate-scrIn">
+      <div className="rounded-card bg-surface border border-rose-100 p-4 sm:p-5 animate-scrIn">
         <h2 className="text-base2 font-bold text-rose-600 mb-1">Danger zone</h2>
         <p className="text-[12px] text-muted mb-4">Deleting your workspace removes all bookings, clients, and history.</p>
         <button type="button" className="rounded-btn border border-rose-200 text-rose-600 px-4 py-2 text-label font-semibold hover:bg-rose-50 transition">

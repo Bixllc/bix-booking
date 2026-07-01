@@ -11,8 +11,8 @@ export function TodaysSchedule() {
   const [staffFilter, setStaffFilter] = useState<'all' | 'mine'>('all')
 
   return (
-    <div className="rounded-card bg-surface border border-border p-5 animate-scrIn">
-      <div className="flex items-center justify-between mb-5">
+    <div className="rounded-card bg-surface border border-border p-4 sm:p-5 animate-scrIn">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-5">
         <h2 className="text-base2 font-bold text-ink">Today's schedule</h2>
         <div className="flex items-center gap-2">
           <button
@@ -33,7 +33,7 @@ export function TodaysSchedule() {
 
       <div className="flex flex-col divide-y divide-border">
         {schedule.map((item) => (
-          <div key={item.id} className="flex items-center gap-4 py-3.5">
+          <div key={item.id} className="flex items-center gap-2.5 sm:gap-4 py-3.5">
             <div className="w-14 shrink-0 text-label text-muted leading-tight">
               <div className="font-semibold text-ink">{item.time}</div>
               <div className="font-mono text-[10px] uppercase">{item.meridiem}</div>

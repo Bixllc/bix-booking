@@ -60,6 +60,7 @@ interface OnboardingState {
   completed: Set<string>
   checklistOpen: boolean
   checklistDismissed: boolean
+  mobileNavOpen: boolean
   startSetup: () => void
   skipWelcome: () => void
   nextStep: () => void
@@ -69,6 +70,9 @@ interface OnboardingState {
   toggleChecklist: () => void
   dismissChecklist: () => void
   completeStep: (id: string) => void
+  openMobileNav: () => void
+  closeMobileNav: () => void
+  toggleMobileNav: () => void
   currentStep: TourStep | null
 }
 
@@ -81,6 +85,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [completed, setCompleted] = useState<Set<string>>(new Set())
   const [checklistOpen, setChecklistOpen] = useState(true)
   const [checklistDismissed, setChecklistDismissed] = useState(false)
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
   const startSetup = useCallback(() => {
     setWelcomeOpen(false)
@@ -136,6 +141,10 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     setChecklistDismissed(true)
   }, [])
 
+  const openMobileNav = useCallback(() => setMobileNavOpen(true), [])
+  const closeMobileNav = useCallback(() => setMobileNavOpen(false), [])
+  const toggleMobileNav = useCallback(() => setMobileNavOpen((v) => !v), [])
+
   const currentStep = tourActive ? TOUR_STEPS[tourStepIndex] ?? null : null
 
   const value = useMemo<OnboardingState>(
@@ -146,6 +155,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       completed,
       checklistOpen,
       checklistDismissed,
+      mobileNavOpen,
       startSetup,
       skipWelcome,
       nextStep,
@@ -155,6 +165,9 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       toggleChecklist,
       dismissChecklist,
       completeStep,
+      openMobileNav,
+      closeMobileNav,
+      toggleMobileNav,
       currentStep,
     }),
     [
@@ -164,6 +177,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       completed,
       checklistOpen,
       checklistDismissed,
+      mobileNavOpen,
       startSetup,
       skipWelcome,
       nextStep,
@@ -173,6 +187,9 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       toggleChecklist,
       dismissChecklist,
       completeStep,
+      openMobileNav,
+      closeMobileNav,
+      toggleMobileNav,
       currentStep,
     ],
   )

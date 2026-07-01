@@ -11,8 +11,8 @@ const steps = [
 
 export function BookingFlow() {
   return (
-    <div className="flex gap-6 h-full">
-      <div className="flex-1 flex flex-col gap-5 max-w-2xl">
+    <div className="flex flex-col lg:flex-row gap-5 lg:gap-6 lg:h-full">
+      <div className="flex-1 flex flex-col gap-5 lg:max-w-2xl">
         <div>
           <h1 className="text-xl font-bold text-ink">Booking flow</h1>
           <p className="text-body text-muted mt-0.5">The steps a client walks through to complete a booking.</p>
@@ -49,8 +49,8 @@ export function BookingFlow() {
         </div>
       </div>
 
-      <div className="w-80 shrink-0">
-        <div className="rounded-card bg-ink-grad p-6 h-full flex flex-col animate-scrIn">
+      <div className="w-full lg:w-80 shrink-0">
+        <div className="rounded-card bg-ink-grad p-5 sm:p-6 lg:h-full flex flex-col animate-scrIn">
           <span className="font-mono text-meta uppercase text-gold-soft">Live preview</span>
           <div className="mt-4 rounded-field bg-white/5 border border-white/10 p-4 flex-1">
             <p className="text-white text-body font-semibold mb-1">Sunset Yacht Tour</p>

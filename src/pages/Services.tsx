@@ -22,21 +22,21 @@ const services: Service[] = [
 export function Services() {
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-ink">Services</h1>
           <p className="text-body text-muted mt-0.5">What clients can book, priced and ready to go.</p>
         </div>
         <button
           type="button"
-          className="flex items-center gap-2 rounded-btn bg-ink-grad px-4 py-2.5 text-label font-semibold text-white hover:brightness-110 transition"
+          className="self-start sm:self-auto flex items-center gap-2 rounded-btn bg-ink-grad px-4 py-2.5 text-label font-semibold text-white hover:brightness-110 transition"
         >
           <Plus size={16} strokeWidth={2} />
           Add service
         </button>
       </div>
 
-      <div className="grid grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
         {services.map((s) => {
           const Icon = s.icon
           return (

@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { X } from 'lucide-react'
 import { useOnboarding, TOUR_STEPS } from '../../context/OnboardingContext'
@@ -10,15 +10,36 @@ interface Rect {
   height: number
 }
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 767px)').matches)
+
+  useEffect(() => {
+    const mql = window.matchMedia('(max-width: 767px)')
+    const onChange = () => setIsMobile(mql.matches)
+    mql.addEventListener('change', onChange)
+    return () => mql.removeEventListener('change', onChange)
+  }, [])
+
+  return isMobile
+}
+
 export function GuidedTour() {
-  const { tourActive, tourStepIndex, currentStep, nextStep, prevStep, endTour } = useOnboarding()
+  const { tourActive, tourStepIndex, currentStep, nextStep, prevStep, endTour, openMobileNav, closeMobileNav } =
+    useOnboarding()
   const navigate = useNavigate()
   const [rect, setRect] = useState<Rect | null>(null)
+  const isMobile = useIsMobile()
 
   useLayoutEffect(() => {
     if (!currentStep) return
     navigate(currentStep.route)
   }, [currentStep, navigate])
+
+  useEffect(() => {
+    if (!tourActive) return
+    if (isMobile) openMobileNav()
+    return () => closeMobileNav()
+  }, [tourActive, isMobile, openMobileNav, closeMobileNav])
 
   useLayoutEffect(() => {
     if (!currentStep) {
@@ -35,12 +56,14 @@ export function GuidedTour() {
 
     measure()
     const raf = requestAnimationFrame(measure)
+    const drawerSettle = window.setTimeout(measure, isMobile ? 240 : 0)
     window.addEventListener('resize', measure)
     return () => {
       cancelAnimationFrame(raf)
+      window.clearTimeout(drawerSettle)
       window.removeEventListener('resize', measure)
     }
-  }, [currentStep, tourStepIndex])
+  }, [currentStep, tourStepIndex, isMobile])
 
   if (!tourActive || !currentStep || !rect) return null
 
@@ -52,8 +75,9 @@ export function GuidedTour() {
     height: rect.height + pad * 2,
   }
 
-  const popoverTop = Math.min(rect.top, window.innerHeight - 260)
-  const popoverLeft = rect.left + rect.width + 20
+  const popoverTop = isMobile ? undefined : Math.min(rect.top, window.innerHeight - 260)
+  const popoverLeft = isMobile ? undefined : Math.min(rect.left + rect.width + 20, window.innerWidth - 300)
+  const mobilePlacement = rect.top < window.innerHeight / 2 ? 'bottom' : 'top'
 
   return (
     <>
@@ -70,8 +94,13 @@ export function GuidedTour() {
       />
 
       <div
-        className="fixed z-[60] w-72 rounded-card bg-surface p-5 shadow-2xl animate-scrIn transition-[top,left] duration-300"
-        style={{ top: popoverTop, left: popoverLeft }}
+        className={[
+          'fixed z-[60] rounded-card bg-surface p-5 shadow-2xl animate-scrIn',
+          isMobile
+            ? `inset-x-4 w-auto ${mobilePlacement === 'bottom' ? 'bottom-4' : 'top-4'}`
+            : 'w-72 transition-[top,left] duration-300',
+        ].join(' ')}
+        style={isMobile ? undefined : { top: popoverTop, left: popoverLeft }}
       >
         <div className="flex items-center justify-between mb-3">
           <span className="font-mono text-meta uppercase text-faint">

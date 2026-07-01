@@ -6,19 +6,35 @@ import { workspace } from '../../lib/mock'
 import { useOnboarding } from '../../context/OnboardingContext'
 
 export function Sidebar() {
-  const { currentStep } = useOnboarding()
+  const { currentStep, tourActive, mobileNavOpen, closeMobileNav } = useOnboarding()
 
   return (
-    <aside className="w-sidebar shrink-0 h-full bg-surface border-r border-border flex flex-col">
-      <div className="h-header shrink-0 px-5 flex items-center gap-2.5">
-        <span className="text-indigo-500">
-          <BixMark size={24} />
-        </span>
-        <span className="text-wordmark text-ink">Bix</span>
-        <span className="ml-auto rounded-chip border border-border-2 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-muted-2">
-          PRO
-        </span>
-      </div>
+    <>
+      {mobileNavOpen && !tourActive && (
+        <button
+          type="button"
+          aria-label="Close menu"
+          onClick={closeMobileNav}
+          className="fixed inset-0 z-40 bg-black/40 md:hidden"
+        />
+      )}
+
+      <aside
+        className={[
+          'w-sidebar shrink-0 h-full bg-surface border-r border-border flex flex-col',
+          'fixed inset-y-0 left-0 z-50 transition-transform duration-200 md:static md:translate-x-0',
+          mobileNavOpen ? 'translate-x-0' : '-translate-x-full',
+        ].join(' ')}
+      >
+        <div className="h-header shrink-0 px-5 flex items-center gap-2.5">
+          <span className="text-indigo-500">
+            <BixMark size={24} />
+          </span>
+          <span className="text-wordmark text-ink">Bix</span>
+          <span className="ml-auto rounded-chip border border-border-2 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-muted-2">
+            PRO
+          </span>
+        </div>
 
       <nav className="flex-1 overflow-y-auto px-3 pt-2 pb-4 flex flex-col gap-5">
         {navGroups.map((group) => (
@@ -33,6 +49,7 @@ export function Sidebar() {
                     key={item.id}
                     id={item.id}
                     to={item.href}
+                    onClick={closeMobileNav}
                     className={({ isActive }) =>
                       [
                         'flex items-center gap-2.5 rounded-btn px-3 py-2.5 text-label transition-[filter,background-color] duration-150',
@@ -86,6 +103,7 @@ export function Sidebar() {
           </button>
         </div>
       </div>
-    </aside>
+      </aside>
+    </>
   )
 }

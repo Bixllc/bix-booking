@@ -1,4 +1,5 @@
-import { Plus, Search } from 'lucide-react'
+import { Menu, Plus, Search } from 'lucide-react'
+import { useOnboarding } from '../../context/OnboardingContext'
 
 function useGreeting() {
   const hour = new Date().getHours()
@@ -14,6 +15,7 @@ interface HeaderProps {
 
 export function Header({ name = 'Cadi', onNewBooking }: HeaderProps) {
   const greeting = useGreeting()
+  const { openMobileNav } = useOnboarding()
   const dateLabel = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
     month: 'long',
@@ -21,18 +23,27 @@ export function Header({ name = 'Cadi', onNewBooking }: HeaderProps) {
   })
 
   return (
-    <header className="h-header shrink-0 bg-surface border-b border-border flex items-center gap-6 px-8">
+    <header className="h-header shrink-0 bg-surface border-b border-border flex items-center gap-3 sm:gap-6 px-4 sm:px-6 lg:px-8">
+      <button
+        type="button"
+        onClick={openMobileNav}
+        aria-label="Open menu"
+        className="shrink-0 md:hidden text-ink hover:bg-canvas rounded-btn p-2 -ml-2 transition"
+      >
+        <Menu size={20} strokeWidth={1.8} />
+      </button>
+
       <div className="min-w-0">
         <h1 className="text-lead text-ink truncate">
           {greeting}, {name}
         </h1>
-        <p className="font-mono text-[12px] text-muted mt-0.5 truncate">
+        <p className="hidden sm:block font-mono text-[12px] text-muted mt-0.5 truncate">
           {dateLabel} &middot; 6 of 18 appointments done
         </p>
       </div>
 
-      <div className="flex-1 flex justify-end items-center gap-3">
-        <div className="w-full max-w-[340px] flex items-center gap-2 rounded-field border border-border bg-canvas px-3.5 py-2.5 text-muted">
+      <div className="flex-1 flex justify-end items-center gap-2 sm:gap-3">
+        <div className="hidden md:flex w-full max-w-[340px] items-center gap-2 rounded-field border border-border bg-canvas px-3.5 py-2.5 text-muted">
           <Search size={16} strokeWidth={1.7} />
           <input
             type="text"
@@ -46,11 +57,19 @@ export function Header({ name = 'Cadi', onNewBooking }: HeaderProps) {
 
         <button
           type="button"
+          aria-label="Search"
+          className="md:hidden shrink-0 rounded-btn border border-border p-2.5 text-muted hover:bg-canvas transition"
+        >
+          <Search size={17} strokeWidth={1.7} />
+        </button>
+
+        <button
+          type="button"
           onClick={onNewBooking}
-          className="shrink-0 flex items-center gap-2 rounded-btn bg-ink-grad px-4 py-2.5 text-label font-semibold text-white hover:brightness-110 transition"
+          className="shrink-0 flex items-center gap-2 rounded-btn bg-ink-grad px-3 sm:px-4 py-2.5 text-label font-semibold text-white hover:brightness-110 transition"
         >
           <Plus size={16} strokeWidth={2} />
-          New booking
+          <span className="hidden sm:inline">New booking</span>
         </button>
       </div>
     </header>

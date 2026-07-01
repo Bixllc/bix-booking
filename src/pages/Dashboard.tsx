@@ -8,7 +8,7 @@ import { newClients, revenueSparkline } from '../lib/mock'
 export function Dashboard() {
   return (
     <div className="flex flex-col gap-5">
-      <div className="grid grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
         <StatCard
           label="Today's revenue"
           value="$4,280"
@@ -71,11 +71,11 @@ export function Dashboard() {
         />
       </div>
 
-      <div className="grid grid-cols-3 gap-5 items-start">
-        <div className="col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 items-start">
+        <div className="lg:col-span-2">
           <TodaysSchedule />
         </div>
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-4 sm:gap-5">
           <PendingConfirmations />
           <RecentActivity />
         </div>

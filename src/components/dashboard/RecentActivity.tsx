@@ -2,7 +2,7 @@ import { activity } from '../../lib/mock'
 
 export function RecentActivity() {
   return (
-    <div className="rounded-card bg-surface border border-border p-5 animate-scrIn">
+    <div className="rounded-card bg-surface border border-border p-4 sm:p-5 animate-scrIn">
       <h2 className="text-base2 font-bold text-ink mb-4">Recent activity</h2>
       <div className="flex flex-col gap-3.5">
         {activity.map((a) => (

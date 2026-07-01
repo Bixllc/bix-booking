@@ -13,7 +13,7 @@ export function StatCard({ label, value, badge, accent, children, footer }: Stat
   return (
     <div
       className={[
-        'rounded-card border p-5 flex flex-col gap-4 animate-scrIn',
+        'rounded-card border p-4 sm:p-5 flex flex-col gap-4 animate-scrIn',
         accent ? 'bg-gold-soft/25 border-gold-soft' : 'bg-surface border-border',
       ].join(' ')}
     >

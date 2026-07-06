@@ -1,0 +1,386 @@
+// Bix Booking — multi-tenant booking/scheduling SaaS
+// learn more about Prisma schema: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Tenancy & auth
+// ---------------------------------------------------------------------------
+
+model Workspace {
+  id         String   @id @default(cuid())
+  name       String
+  slug       String   @unique
+  timezone   String   @default("UTC")
+  currency   String   @default("USD")
+  setupState Json     @default("{\"service\":false,\"flow\":false,\"hours\":false,\"pay\":false,\"team\":false,\"share\":false}")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  users              User[]
+  services           Service[]
+  staff              Staff[]
+  bookingFlow        BookingFlow?
+  addOns             AddOn[]
+  availabilityRule   AvailabilityRule?
+  paymentPolicy      PaymentPolicy?
+  cancellationPolicy CancellationPolicy?
+  clients            Client[]
+  bookings           Booking[]
+
+  @@map("workspaces")
+}
+
+enum Role {
+  owner
+  admin
+  staff
+}
+
+model User {
+  id               String    @id @default(cuid())
+  workspaceId      String
+  workspace        Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  role             Role      @default(staff)
+  name             String
+  email            String
+  passwordHash     String
+  refreshTokenHash String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  staff Staff?
+
+  @@unique([workspaceId, email])
+  @@index([workspaceId])
+  @@map("users")
+}
+
+// ---------------------------------------------------------------------------
+// Catalog
+// ---------------------------------------------------------------------------
+
+model Service {
+  id              String    @id @default(cuid())
+  workspaceId     String
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name            String
+  description     String?
+  durationMinutes Int
+  priceCents      Int
+  category        String
+  bufferBeforeMin Int       @default(0)
+  bufferAfterMin  Int       @default(0)
+  active          Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  staff    StaffService[]
+  addOns   ServiceAddOn[]
+  bookings Booking[]
+
+  @@index([workspaceId])
+  @@map("services")
+}
+
+model AddOn {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name        String
+  priceCents  Int
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  services      ServiceAddOn[]
+  bookingAddOns BookingAddOn[]
+
+  @@index([workspaceId])
+  @@map("add_ons")
+}
+
+model ServiceAddOn {
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  addOnId   String
+  addOn     AddOn   @relation(fields: [addOnId], references: [id], onDelete: Cascade)
+
+  @@id([serviceId, addOnId])
+  @@map("service_add_ons")
+}
+
+// ---------------------------------------------------------------------------
+// Staff & scheduling primitives
+// ---------------------------------------------------------------------------
+
+model Staff {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String?   @unique
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name        String
+  color       String    @default("#bf9a42")
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  services     StaffService[]
+  workingHours WorkingHours[]
+  timeOff      TimeOff[]
+  bookings     Booking[]
+
+  @@index([workspaceId])
+  @@map("staff")
+}
+
+model StaffService {
+  staffId   String
+  staff     Staff   @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@id([staffId, serviceId])
+  @@map("staff_services")
+}
+
+// weekday: 0 (Sunday) .. 6 (Saturday). Times stored as "HH:mm" in workspace-local time.
+model WorkingHours {
+  id        String @id @default(cuid())
+  staffId   String
+  staff     Staff  @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  weekday   Int
+  startTime String
+  endTime   String
+
+  @@index([staffId])
+  @@map("working_hours")
+}
+
+model TimeOff {
+  id      String   @id @default(cuid())
+  staffId String
+  staff   Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  startAt DateTime
+  endAt   DateTime
+  reason  String?
+
+  @@index([staffId])
+  @@map("time_off")
+}
+
+// ---------------------------------------------------------------------------
+// Booking flow (public-facing wizard configuration)
+// ---------------------------------------------------------------------------
+
+enum FlowStepType {
+  service_select
+  date_time
+  customer_info
+  add_ons
+  payment
+  custom_field
+}
+
+model BookingFlow {
+  id          String    @id @default(cuid())
+  workspaceId String    @unique
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  steps FlowStep[]
+
+  @@map("booking_flows")
+}
+
+model FlowStep {
+  id            String       @id @default(cuid())
+  bookingFlowId String
+  bookingFlow   BookingFlow  @relation(fields: [bookingFlowId], references: [id], onDelete: Cascade)
+  type          FlowStepType
+  position      Int
+  required      Boolean      @default(true)
+  enabled       Boolean      @default(true)
+  config        Json         @default("{}")
+
+  @@index([bookingFlowId])
+  @@map("flow_steps")
+}
+
+// ---------------------------------------------------------------------------
+// Availability & policy (singleton-per-workspace) rules
+// ---------------------------------------------------------------------------
+
+// weekday hours stored as JSON: { "0": [["09:00","17:00"]], "1": [...], ... }
+model AvailabilityRule {
+  id              String    @id @default(cuid())
+  workspaceId     String    @unique
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  weekdayHours    Json
+  blackoutDates   Json      @default("[]")
+  minLeadMinutes  Int       @default(60)
+  maxAdvanceDays  Int       @default(60)
+  slotGranularity Int       @default(30)
+  travelBufferMin Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("availability_rules")
+}
+
+enum PaymentMode {
+  deposit
+  full
+  none
+}
+
+enum ChargeTiming {
+  at_booking
+  before_start
+}
+
+model PaymentPolicy {
+  id             String       @id @default(cuid())
+  workspaceId    String       @unique
+  workspace      Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  mode           PaymentMode  @default(none)
+  depositPercent Int?
+  depositCents   Int?
+  chargeTiming   ChargeTiming @default(at_booking)
+  currency       String       @default("USD")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@map("payment_policies")
+}
+
+model CancellationPolicy {
+  id               String    @id @default(cuid())
+  workspaceId      String    @unique
+  workspace        Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  freeCancelHours  Int       @default(24)
+  lateFeePercent   Int       @default(0)
+  noShowFeePercent Int       @default(100)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@map("cancellation_policies")
+}
+
+// ---------------------------------------------------------------------------
+// Clients & bookings
+// ---------------------------------------------------------------------------
+
+model Client {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name        String
+  email       String
+  phone       String?
+  notes       String?
+  tags        String[]  @default([])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  bookings Booking[]
+
+  @@unique([workspaceId, email])
+  @@index([workspaceId])
+  @@map("clients")
+}
+
+enum BookingStatus {
+  pending
+  confirmed
+  completed
+  cancelled
+  no_show
+}
+
+model Booking {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  serviceId   String
+  service     Service   @relation(fields: [serviceId], references: [id])
+  staffId     String
+  staff       Staff     @relation(fields: [staffId], references: [id])
+  clientId    String
+  client      Client    @relation(fields: [clientId], references: [id])
+
+  startAt    DateTime
+  endAt      DateTime
+  status     BookingStatus @default(pending)
+  priceCents Int
+  currency   String        @default("USD")
+  answers    Json          @default("{}")
+
+  cancelledAt    DateTime?
+  cancelFeeCents Int?
+  cancelReason   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  addOns   BookingAddOn[]
+  payments Payment[]
+
+  @@index([workspaceId, startAt])
+  @@index([staffId, startAt])
+  @@index([workspaceId, status])
+  @@map("bookings")
+}
+
+model BookingAddOn {
+  bookingId  String
+  booking    Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  addOnId    String
+  addOn      AddOn   @relation(fields: [addOnId], references: [id])
+  priceCents Int
+
+  @@id([bookingId, addOnId])
+  @@map("booking_add_ons")
+}
+
+enum PaymentType {
+  deposit
+  balance
+  full
+}
+
+enum PaymentStatus {
+  requires_payment
+  processing
+  succeeded
+  failed
+  refunded
+  partially_refunded
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  bookingId     String
+  booking       Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  provider      String        @default("stripe")
+  intentId      String?       @unique
+  amountCents   Int
+  currency      String        @default("USD")
+  type          PaymentType
+  status        PaymentStatus @default(requires_payment)
+  refundedCents Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([bookingId])
+  @@map("payments")
+}

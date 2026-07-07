@@ -1,5 +1,4 @@
 import Fastify, { type FastifyError } from 'fastify'
-import cors from '@fastify/cors'
 import rateLimit from '@fastify/rate-limit'
 import { env } from './env.js'
 import { AppError, toErrorEnvelope } from './lib/errors.js'
@@ -25,7 +24,34 @@ export function buildApp() {
     },
   })
 
-  app.register(cors, { origin: true })
+  const allowedOrigins = (env.ALLOWED_ORIGINS ?? env.PUBLIC_APP_URL).split(',').map((s) => s.trim()).filter(Boolean)
+
+  // Hand-rolled instead of @fastify/cors: that plugin's `origin` callback only
+  // receives the Origin header, not the request, so it can't be path-aware —
+  // and public booking-widget routes need a different policy (any origin)
+  // than authenticated admin routes (known origins only, in production).
+  app.addHook('onRequest', (request, reply, done) => {
+    const origin = request.headers.origin
+    const path = request.raw.url ?? ''
+    const isPublic = path.startsWith('/public/')
+
+    if (origin) {
+      const allowed = isPublic || env.NODE_ENV !== 'production' || allowedOrigins.includes(origin)
+      if (allowed) {
+        reply.header('Access-Control-Allow-Origin', origin)
+        reply.header('Vary', 'Origin')
+      }
+      reply.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS')
+      reply.header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    }
+
+    if (request.method === 'OPTIONS') {
+      reply.code(204).send()
+      return
+    }
+
+    done()
+  })
 
   // Default budget for authenticated, tenant-scoped traffic. Public/auth
   // routes tighten this further via their own route-level config below.

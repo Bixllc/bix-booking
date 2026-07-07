@@ -123,3 +123,10 @@ The suite focuses on the availability engine, since that's where subtle bugs
 hide: buffer overlap, DST spring-forward, back-to-back bookings with zero
 buffer, lead-time cutoffs, max-advance-window, blackout dates, time off, slot
 granularity, and per-staff isolation.
+
+## Deploying
+
+A `Dockerfile` is included and builds/runs cleanly against any Postgres —
+see [`DEPLOYMENT.md`](../DEPLOYMENT.md) at the repo root for env vars and
+the full deploy checklist (covers the frontend too). CI (`.github/workflows/ci.yml`)
+runs typecheck, tests, migrations, and both builds on every push.

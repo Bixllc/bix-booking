@@ -12,6 +12,11 @@ const envSchema = z.object({
   STRIPE_SECRET_KEY: z.string().min(1),
   STRIPE_WEBHOOK_SECRET: z.string().min(1),
   PUBLIC_APP_URL: z.string().default('http://localhost:5173'),
+  // Comma-separated list of origins allowed to call authenticated routes in
+  // production. Falls back to PUBLIC_APP_URL if unset. Public/webhook routes
+  // are never restricted by this — they're meant to be called from anywhere
+  // (embedded booking widgets, Stripe's servers).
+  ALLOWED_ORIGINS: z.string().optional(),
 })
 
 const parsed = envSchema.safeParse(process.env)

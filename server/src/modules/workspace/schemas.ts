@@ -9,3 +9,12 @@ export const setupStateSchema = z.object({
   share: z.boolean().optional(),
 })
 export type SetupStateInput = z.infer<typeof setupStateSchema>
+
+export const updateWorkspaceSchema = z.object({
+  name: z.string().min(1).max(120).optional(),
+  timezone: z.string().min(1).optional(),
+  currency: z.string().length(3).optional(),
+  supportEmail: z.string().email().optional(),
+  phone: z.string().max(40).optional(),
+})
+export type UpdateWorkspaceInput = z.infer<typeof updateWorkspaceSchema>

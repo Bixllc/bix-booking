@@ -1,5 +1,7 @@
 import { Menu, Plus, Search } from 'lucide-react'
 import { useOnboarding } from '../../context/OnboardingContext'
+import { useAuth } from '../../context/AuthContext'
+import { useDashboardStats } from '../../hooks/useDashboardStats'
 
 function useGreeting() {
   const hour = new Date().getHours()
@@ -9,18 +11,21 @@ function useGreeting() {
 }
 
 interface HeaderProps {
-  name?: string
   onNewBooking?: () => void
 }
 
-export function Header({ name = 'Cadi', onNewBooking }: HeaderProps) {
+export function Header({ onNewBooking }: HeaderProps) {
   const greeting = useGreeting()
   const { openMobileNav } = useOnboarding()
+  const { user } = useAuth()
+  const { data: stats } = useDashboardStats()
   const dateLabel = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
   })
+
+  const firstName = user?.name.split(' ')[0] ?? ''
 
   return (
     <header className="h-header shrink-0 bg-surface border-b border-border flex items-center gap-3 sm:gap-6 px-4 sm:px-6 lg:px-8">
@@ -35,10 +40,11 @@ export function Header({ name = 'Cadi', onNewBooking }: HeaderProps) {
 
       <div className="min-w-0">
         <h1 className="text-lead text-ink truncate">
-          {greeting}, {name}
+          {greeting}{firstName ? `, ${firstName}` : ''}
         </h1>
         <p className="hidden sm:block font-mono text-[12px] text-muted mt-0.5 truncate">
-          {dateLabel} &middot; 6 of 18 appointments done
+          {dateLabel}
+          {stats ? ` · ${stats.appointments.completed} of ${stats.appointments.total} appointments done` : ''}
         </p>
       </div>
 

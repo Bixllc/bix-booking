@@ -15,14 +15,16 @@ datasource db {
 // ---------------------------------------------------------------------------
 
 model Workspace {
-  id         String   @id @default(cuid())
-  name       String
-  slug       String   @unique
-  timezone   String   @default("UTC")
-  currency   String   @default("USD")
-  setupState Json     @default("{\"service\":false,\"flow\":false,\"hours\":false,\"pay\":false,\"team\":false,\"share\":false}")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  timezone     String   @default("UTC")
+  currency     String   @default("USD")
+  supportEmail String?
+  phone        String?
+  setupState   Json     @default("{\"service\":false,\"flow\":false,\"hours\":false,\"pay\":false,\"team\":false,\"share\":false}")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   users              User[]
   services           Service[]
@@ -312,11 +314,11 @@ model Booking {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   serviceId   String
-  service     Service   @relation(fields: [serviceId], references: [id])
+  service     Service   @relation(fields: [serviceId], references: [id], onDelete: Cascade)
   staffId     String
-  staff       Staff     @relation(fields: [staffId], references: [id])
+  staff       Staff     @relation(fields: [staffId], references: [id], onDelete: Cascade)
   clientId    String
-  client      Client    @relation(fields: [clientId], references: [id])
+  client      Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   startAt    DateTime
   endAt      DateTime
@@ -345,7 +347,7 @@ model BookingAddOn {
   bookingId  String
   booking    Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   addOnId    String
-  addOn      AddOn   @relation(fields: [addOnId], references: [id])
+  addOn      AddOn   @relation(fields: [addOnId], references: [id], onDelete: Cascade)
   priceCents Int
 
   @@id([bookingId, addOnId])

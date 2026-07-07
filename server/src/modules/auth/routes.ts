@@ -58,7 +58,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
     const tokens = await issueTokens(user)
 
     reply.code(201).send({
-      workspace: { id: workspace.id, name: workspace.name, slug: workspace.slug },
+      workspace: { id: workspace.id, name: workspace.name, slug: workspace.slug, timezone: workspace.timezone, currency: workspace.currency },
       user: { id: user.id, name: user.name, email: user.email, role: user.role },
       ...tokens,
     })
@@ -87,7 +87,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
     const tokens = await issueTokens(user)
 
     reply.send({
-      workspace: { id: workspace.id, name: workspace.name, slug: workspace.slug },
+      workspace: { id: workspace.id, name: workspace.name, slug: workspace.slug, timezone: workspace.timezone, currency: workspace.currency },
       user: { id: user.id, name: user.name, email: user.email, role: user.role },
       ...tokens,
     })
@@ -127,7 +127,13 @@ export default async function authRoutes(fastify: FastifyInstance) {
 
     reply.send({
       user: { id: user.id, name: user.name, email: user.email, role: user.role },
-      workspace: { id: user.workspace.id, name: user.workspace.name, slug: user.workspace.slug },
+      workspace: {
+        id: user.workspace.id,
+        name: user.workspace.name,
+        slug: user.workspace.slug,
+        timezone: user.workspace.timezone,
+        currency: user.workspace.currency,
+      },
     })
   })
 }

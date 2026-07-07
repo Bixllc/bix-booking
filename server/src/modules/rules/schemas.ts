@@ -16,12 +16,12 @@ export type AvailabilityRuleInput = z.infer<typeof availabilityRuleSchema>
 export const paymentPolicySchema = z
   .object({
     mode: z.enum(['deposit', 'full', 'none']),
-    depositPercent: z.number().int().min(1).max(100).optional(),
-    depositCents: z.number().int().positive().optional(),
+    depositPercent: z.number().int().min(1).max(100).nullish(),
+    depositCents: z.number().int().positive().nullish(),
     chargeTiming: z.enum(['at_booking', 'before_start']).default('at_booking'),
     currency: z.string().length(3).default('USD'),
   })
-  .refine((v) => v.mode !== 'deposit' || v.depositPercent !== undefined || v.depositCents !== undefined, {
+  .refine((v) => v.mode !== 'deposit' || v.depositPercent != null || v.depositCents != null, {
     message: 'deposit mode requires depositPercent or depositCents',
   })
 export type PaymentPolicyInput = z.infer<typeof paymentPolicySchema>

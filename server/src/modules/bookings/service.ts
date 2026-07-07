@@ -123,24 +123,34 @@ export async function createPublicBooking(workspaceSlug: string, input: PublicCr
       ? (paymentPolicy.depositCents ?? percentOfCents(priceCents, paymentPolicy.depositPercent ?? 100))
       : priceCents
 
-  const intent = await stripe.paymentIntents.create({
-    amount: amountCents,
-    currency: workspace.currency.toLowerCase(),
-    metadata: { bookingId: booking.id, workspaceId: workspace.id },
-  })
+  try {
+    const intent = await stripe.paymentIntents.create({
+      amount: amountCents,
+      currency: workspace.currency.toLowerCase(),
+      metadata: { bookingId: booking.id, workspaceId: workspace.id },
+    })
 
-  await prisma.payment.create({
-    data: {
-      bookingId: booking.id,
-      intentId: intent.id,
-      amountCents,
-      currency: workspace.currency,
-      type: paymentPolicy.mode === 'deposit' ? 'deposit' : 'full',
-      status: 'requires_payment',
-    },
-  })
+    await prisma.payment.create({
+      data: {
+        bookingId: booking.id,
+        intentId: intent.id,
+        amountCents,
+        currency: workspace.currency,
+        type: paymentPolicy.mode === 'deposit' ? 'deposit' : 'full',
+        status: 'requires_payment',
+      },
+    })
 
-  return { booking, clientSecret: intent.client_secret }
+    return { booking, clientSecret: intent.client_secret }
+  } catch (err) {
+    // Don't strand the slot in `pending` forever if Stripe is unreachable or
+    // misconfigured — free it back up and surface a clear error.
+    await prisma.booking.update({
+      where: { id: booking.id },
+      data: { status: 'cancelled', cancelledAt: new Date(), cancelReason: 'Payment setup failed' },
+    })
+    throw AppError.internal('We could not set up payment for this booking. Please try again shortly.')
+  }
 }
 
 /** Staff/admin creating a booking directly (e.g. over the phone) — skips the public

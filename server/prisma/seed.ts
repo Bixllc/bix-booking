@@ -2,21 +2,34 @@ import 'dotenv/config'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '../generated/prisma/client.js'
 import { hashPassword } from '../src/lib/passwords.js'
+import { addDaysToDateString, localToUtc } from '../src/modules/availability/timezone.js'
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
 const prisma = new PrismaClient({ adapter })
 
 const WORKSPACE_SLUG = 'big-cadi-vip'
+const WORKSPACE_TZ = 'America/New_York'
+
+function localTodayDateStr(): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: WORKSPACE_TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(
+    new Date(),
+  )
+}
+
+// hour/minute are workspace-local wall-clock time, converted to the correct UTC instant.
+function dateAt(dayOffset: number, hour: number, minute = 0): Date {
+  const dateStr = addDaysToDateString(localTodayDateStr(), dayOffset)
+  const hh = String(hour).padStart(2, '0')
+  const mm = String(minute).padStart(2, '0')
+  return localToUtc(dateStr, `${hh}:${mm}`, WORKSPACE_TZ)
+}
 
 function daysAgo(days: number, hour: number, minute = 0): Date {
-  const d = new Date()
-  d.setUTCDate(d.getUTCDate() - days)
-  d.setUTCHours(hour, minute, 0, 0)
-  return d
+  return dateAt(-days, hour, minute)
 }
 
 function daysFromNow(days: number, hour: number, minute = 0): Date {
-  return daysAgo(-days, hour, minute)
+  return dateAt(days, hour, minute)
 }
 
 async function main() {
@@ -34,6 +47,8 @@ async function main() {
       slug: WORKSPACE_SLUG,
       timezone: 'America/New_York',
       currency: 'USD',
+      supportEmail: 'concierge@bigcadivip.com',
+      phone: '+1 (305) 555-0148',
       setupState: { service: true, flow: true, hours: true, pay: true, team: true, share: false },
     },
   })

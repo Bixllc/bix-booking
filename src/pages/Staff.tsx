@@ -1,25 +1,30 @@
-import { Plus, Star } from 'lucide-react'
-
-interface StaffMember {
-  id: string
-  name: string
-  role: string
-  initials: string
-  color: string
-  rating: string
-  bookings: number
-}
-
-const staff: StaffMember[] = [
-  { id: '1', name: 'Damon Carter', role: 'Chauffeur · Sedan & SUV', initials: 'DC', color: 'bg-rose-200 text-rose-900', rating: '4.9', bookings: 142 },
-  { id: '2', name: 'Mateo Alvarez', role: 'Chauffeur · SUV', initials: 'MA', color: 'bg-sky-200 text-sky-900', rating: '4.8', bookings: 98 },
-  { id: '3', name: 'Leo Ortiz', role: 'Yacht Captain', initials: 'LO', color: 'bg-indigo-200 text-indigo-900', rating: '5.0', bookings: 76 },
-  { id: '4', name: 'Priya Nair', role: 'Chauffeur · Sedan', initials: 'PN', color: 'bg-emerald-200 text-emerald-900', rating: '4.9', bookings: 121 },
-  { id: '5', name: 'Owen Blake', role: 'First Mate', initials: 'OB', color: 'bg-amber-200 text-amber-900', rating: '4.7', bookings: 54 },
-  { id: '6', name: 'Nina Torres', role: 'Chauffeur · Fleet Lead', initials: 'NT', color: 'bg-purple-200 text-purple-900', rating: '4.9', bookings: 167 },
-]
+import { useState, type FormEvent } from 'react'
+import { Plus } from 'lucide-react'
+import { useCreateStaff, useStaff } from '../hooks/useStaff'
+import { initialsOf } from '../lib/formatTime'
+import { Modal } from '../components/ui/Modal'
 
 export function Staff() {
+  const { data, isLoading } = useStaff()
+  const createStaff = useCreateStaff()
+  const [modalOpen, setModalOpen] = useState(false)
+  const [name, setName] = useState('')
+  const [error, setError] = useState<string | null>(null)
+
+  const staff = data?.staff ?? []
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    setError(null)
+    try {
+      await createStaff.mutateAsync({ name })
+      setModalOpen(false)
+      setName('')
+    } catch {
+      setError('Could not add team member. Please try again.')
+    }
+  }
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -29,6 +34,7 @@ export function Staff() {
         </div>
         <button
           type="button"
+          onClick={() => setModalOpen(true)}
           className="self-start sm:self-auto flex items-center gap-2 rounded-btn bg-ink-grad px-4 py-2.5 text-label font-semibold text-white hover:brightness-110 transition"
         >
           <Plus size={16} strokeWidth={2} />
@@ -36,26 +42,65 @@ export function Staff() {
         </button>
       </div>
 
+      {isLoading && <p className="text-body text-muted">Loading staff…</p>}
+      {!isLoading && staff.length === 0 && <p className="text-body text-muted">No staff yet — add your team.</p>}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
-        {staff.map((s) => (
-          <div key={s.id} className="rounded-card bg-surface border border-border p-4 sm:p-5 flex items-center gap-3.5 animate-scrIn">
-            <div className={`size-11 shrink-0 rounded-avatar flex items-center justify-center text-[12px] font-bold ${s.color}`}>
-              {s.initials}
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-body font-semibold text-ink truncate">{s.name}</div>
-              <div className="text-[12px] text-muted truncate">{s.role}</div>
-              <div className="flex items-center gap-3 mt-1.5">
-                <span className="flex items-center gap-1 text-[11.5px] font-medium text-ink">
-                  <Star size={12} strokeWidth={0} fill="#bf9a42" />
-                  {s.rating}
+        {staff.map((s) => {
+          const services = (s.services ?? []).map((x) => x.service.name)
+          const role = services.length > 0 ? services.slice(0, 2).join(', ') : 'No services assigned'
+          return (
+            <div key={s.id} className="rounded-card bg-surface border border-border p-4 sm:p-5 flex items-center gap-3.5 animate-scrIn">
+              <div
+                className="size-11 shrink-0 rounded-avatar flex items-center justify-center text-[12px] font-bold text-white"
+                style={{ backgroundColor: s.color }}
+              >
+                {initialsOf(s.name)}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-body font-semibold text-ink truncate">{s.name}</div>
+                <div className="text-[12px] text-muted truncate">{role}</div>
+                <span
+                  className={[
+                    'inline-block mt-1.5 rounded-chip px-2 py-0.5 text-[10.5px] font-mono font-semibold',
+                    s.active ? 'bg-emerald-50 text-emerald-600' : 'bg-canvas text-muted',
+                  ].join(' ')}
+                >
+                  {s.active ? 'ACTIVE' : 'INACTIVE'}
                 </span>
-                <span className="font-mono text-[10.5px] text-faint">{s.bookings} bookings</span>
               </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
+
+      {modalOpen && (
+        <Modal title="Invite team member" onClose={() => setModalOpen(false)}>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <label className="flex flex-col gap-1.5">
+              <span className="text-[12px] font-medium text-muted">Name</span>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                placeholder="Jordan Blake"
+                className="rounded-field border border-border bg-canvas px-3.5 py-2.5 text-body text-ink outline-none focus:border-gold transition"
+              />
+            </label>
+            <p className="text-[12px] text-muted -mt-1">
+              You can assign services and set working hours after adding them.
+            </p>
+            {error && <p className="text-[12.5px] text-rose-600">{error}</p>}
+            <button
+              type="submit"
+              disabled={createStaff.isPending}
+              className="mt-1 w-full rounded-btn bg-ink-grad py-3 text-base2 font-bold text-white hover:brightness-110 transition disabled:opacity-60"
+            >
+              {createStaff.isPending ? 'Adding…' : 'Add team member'}
+            </button>
+          </form>
+        </Modal>
+      )}
     </div>
   )
 }

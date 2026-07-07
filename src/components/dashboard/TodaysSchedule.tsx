@@ -1,13 +1,31 @@
 import { useState } from 'react'
-import { schedule } from '../../lib/mock'
+import type { Booking } from '../../lib/api/types'
+import { formatCents, initialsOf, splitTimeInZone } from '../../lib/formatTime'
 
 const statusStyles: Record<string, string> = {
-  Confirmed: 'text-emerald-600',
-  'Checked in': 'text-sky-600',
-  'In progress': 'text-amber-600',
+  confirmed: 'text-emerald-600',
+  completed: 'text-sky-600',
+  pending: 'text-amber-600',
+  cancelled: 'text-faint',
+  no_show: 'text-rose-600',
 }
 
-export function TodaysSchedule() {
+const statusLabels: Record<string, string> = {
+  confirmed: 'Confirmed',
+  completed: 'Completed',
+  pending: 'Pending',
+  cancelled: 'Cancelled',
+  no_show: 'No-show',
+}
+
+interface TodaysScheduleProps {
+  bookings: Booking[]
+  timezone: string
+  currency: string
+  isLoading: boolean
+}
+
+export function TodaysSchedule({ bookings, timezone, currency, isLoading }: TodaysScheduleProps) {
   const [staffFilter, setStaffFilter] = useState<'all' | 'mine'>('all')
 
   return (
@@ -31,29 +49,37 @@ export function TodaysSchedule() {
         </div>
       </div>
 
+      {isLoading && <p className="text-body text-muted py-6 text-center">Loading schedule…</p>}
+      {!isLoading && bookings.length === 0 && (
+        <p className="text-body text-muted py-6 text-center">No appointments today.</p>
+      )}
+
       <div className="flex flex-col divide-y divide-border">
-        {schedule.map((item) => (
-          <div key={item.id} className="flex items-center gap-2.5 sm:gap-4 py-3.5">
-            <div className="w-14 shrink-0 text-label text-muted leading-tight">
-              <div className="font-semibold text-ink">{item.time}</div>
-              <div className="font-mono text-[10px] uppercase">{item.meridiem}</div>
-            </div>
-            <span className={`w-1 self-stretch rounded-full ${item.accent}`} />
-            <div className="size-9 shrink-0 rounded-avatar bg-canvas border border-border flex items-center justify-center text-[11px] font-bold text-ink">
-              {item.initials}
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-body font-semibold text-ink truncate">{item.client}</div>
-              <div className="text-[12px] text-muted truncate">
-                {item.service} · {item.detail} · w/ {item.staff}
+        {bookings.map((item) => {
+          const { time, meridiem } = splitTimeInZone(item.startAt, timezone)
+          return (
+            <div key={item.id} className="flex items-center gap-2.5 sm:gap-4 py-3.5">
+              <div className="w-14 shrink-0 text-label text-muted leading-tight">
+                <div className="font-semibold text-ink">{time}</div>
+                <div className="font-mono text-[10px] uppercase">{meridiem}</div>
+              </div>
+              <span className="w-1 self-stretch rounded-full" style={{ backgroundColor: item.staff.color }} />
+              <div className="size-9 shrink-0 rounded-avatar bg-canvas border border-border flex items-center justify-center text-[11px] font-bold text-ink">
+                {initialsOf(item.client.name)}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-body font-semibold text-ink truncate">{item.client.name}</div>
+                <div className="text-[12px] text-muted truncate">
+                  {item.service.name} · w/ {item.staff.name}
+                </div>
+              </div>
+              <div className="shrink-0 text-right">
+                <div className="text-body font-semibold text-ink">{formatCents(item.priceCents, currency)}</div>
+                <div className={`text-[12px] font-medium ${statusStyles[item.status]}`}>{statusLabels[item.status]}</div>
               </div>
             </div>
-            <div className="shrink-0 text-right">
-              {item.price && <div className="text-body font-semibold text-ink">{item.price}</div>}
-              <div className={`text-[12px] font-medium ${statusStyles[item.status]}`}>{item.status}</div>
-            </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

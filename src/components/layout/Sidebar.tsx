@@ -1,12 +1,19 @@
-import { NavLink } from 'react-router-dom'
-import { Eye, Plus, X } from 'lucide-react'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { Eye, LogOut, Plus } from 'lucide-react'
 import { BixMark } from '../ui/BixMark'
 import { navGroups } from '../../lib/nav'
-import { workspace } from '../../lib/mock'
 import { useOnboarding } from '../../context/OnboardingContext'
+import { useAuth } from '../../context/AuthContext'
 
 export function Sidebar() {
   const { currentStep, tourActive, mobileNavOpen, closeMobileNav } = useOnboarding()
+  const { workspace, logout } = useAuth()
+  const navigate = useNavigate()
+
+  function handleLogout() {
+    logout()
+    navigate('/login', { replace: true })
+  }
 
   return (
     <>
@@ -79,9 +86,11 @@ export function Sidebar() {
           New booking
         </button>
 
-        <button
+        <a
           id="view-booking-page"
-          type="button"
+          href={workspace ? `/book/${workspace.slug}` : '#'}
+          target="_blank"
+          rel="noreferrer"
           className={[
             'flex items-center gap-2 rounded-btn px-3 py-2.5 text-label font-medium text-ink transition',
             'bg-gold-soft/40 hover:brightness-[.97]',
@@ -90,16 +99,21 @@ export function Sidebar() {
         >
           <Eye size={16} strokeWidth={1.7} />
           View booking page
-        </button>
+        </a>
 
         <div className="flex items-center gap-3 rounded-btn bg-canvas px-3 py-2.5">
           <div className="size-9 shrink-0 rounded-avatar bg-ink-grad" />
           <div className="min-w-0 flex-1">
-            <div className="truncate text-label font-semibold text-ink">{workspace.name}</div>
-            <div className="truncate text-[11px] text-muted">{workspace.detail}</div>
+            <div className="truncate text-label font-semibold text-ink">{workspace?.name ?? 'Loading…'}</div>
+            <div className="truncate text-[11px] text-muted">/{workspace?.slug}</div>
           </div>
-          <button type="button" className="shrink-0 text-faint hover:text-muted transition" aria-label="Dismiss">
-            <X size={14} strokeWidth={1.7} />
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="shrink-0 text-faint hover:text-muted transition"
+            aria-label="Log out"
+          >
+            <LogOut size={14} strokeWidth={1.7} />
           </button>
         </div>
       </div>

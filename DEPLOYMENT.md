@@ -61,10 +61,11 @@ deployed URL (e.g. `https://api.bigcadivip.com`). Falls back to
 VITE_API_URL=https://your-api-domain npm run build
 ```
 
-Deploy the resulting `dist/` folder as a static site. If your host does
-client-side routing for you (Vercel/Netlify), make sure unknown paths
-rewrite to `/index.html` — this is a single-page app (`react-router`), so a
-direct load of e.g. `/book/big-cadi-vip` needs to hit `index.html`, not 404.
+Deploy the resulting `dist/` folder as a static site. This is a
+single-page app (`react-router`), so a direct load of e.g.
+`/book/big-cadi-vip` needs to hit `index.html`, not 404 — `vercel.json` at
+the repo root already has the rewrite for Vercel; other static hosts need
+an equivalent (Netlify: `_redirects` with `/* /index.html 200`).
 
 ## 4. Wire them together
 

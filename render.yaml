@@ -7,7 +7,10 @@ services:
     plan: free
     region: virginia
     healthCheckPath: /health
-    preDeployCommand: npx prisma migrate deploy
+    # preDeployCommand (auto-runs `prisma migrate deploy` before each deploy)
+    # needs a paid plan — not available on free. Run migrations manually
+    # against DATABASE_URL when the schema changes, or add this back if you
+    # upgrade off the free plan.
     envVars:
       - key: NODE_ENV
         value: production

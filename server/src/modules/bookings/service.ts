@@ -5,10 +5,29 @@ import { percentOfCents } from '../../lib/money.js'
 import { stripe } from '../../lib/stripe.js'
 import { setTenantId } from '../../lib/tenantContext.js'
 import { BookingEvents, domainEvents } from '../../lib/events.js'
+import type { CustomFieldAnswer } from '../../lib/notifications.js'
 import { findOrCreateClient } from '../clients/service.js'
 import { hasConflict } from './conflict.js'
 import { validateAgainstFlow } from './flowValidation.js'
 import type { InternalCreateBookingInput, PublicCreateBookingInput } from './schemas.js'
+
+function buildCustomFieldAnswers(
+  steps: Array<{ id: string; type: string; config: unknown }>,
+  answers: unknown,
+): CustomFieldAnswer[] {
+  if (!answers || typeof answers !== 'object') return []
+  const answerMap = answers as Record<string, unknown>
+
+  const result: CustomFieldAnswer[] = []
+  for (const step of steps) {
+    if (step.type !== 'custom_field') continue
+    const value = answerMap[step.id]
+    if (value === undefined || value === null || value === '') continue
+    const config = step.config as { label?: string } | null
+    result.push({ label: config?.label ?? 'Custom field', value: String(value) })
+  }
+  return result
+}
 
 export async function createPublicBooking(workspaceSlug: string, input: PublicCreateBookingInput) {
   const workspace = await rawPrisma.workspace.findUnique({ where: { slug: workspaceSlug } })
@@ -96,13 +115,19 @@ export async function createPublicBooking(workspaceSlug: string, input: PublicCr
     })
   })
 
+  const customFields = buildCustomFieldAnswers(flow?.steps ?? [], input.answers)
+
   domainEvents.emit(BookingEvents.created, {
     bookingId: booking.id,
     workspaceId: workspace.id,
     clientEmail: client.email,
     clientName: client.name,
+    clientPhone: client.phone ?? undefined,
     serviceName: service.name,
     startAt,
+    priceCents,
+    currency: workspace.currency,
+    customFields,
   })
 
   if (!paymentPolicy || paymentPolicy.mode === 'none') {
@@ -112,8 +137,12 @@ export async function createPublicBooking(workspaceSlug: string, input: PublicCr
       workspaceId: workspace.id,
       clientEmail: client.email,
       clientName: client.name,
+      clientPhone: client.phone ?? undefined,
       serviceName: service.name,
       startAt,
+      priceCents,
+      currency: workspace.currency,
+      customFields,
     })
     return { booking: confirmed, clientSecret: null }
   }
@@ -219,16 +248,22 @@ export async function createInternalBooking(workspaceId: string, input: Internal
     workspaceId,
     clientEmail: client.email,
     clientName: client.name,
+    clientPhone: client.phone ?? undefined,
     serviceName: service.name,
     startAt,
+    priceCents,
+    currency: workspace.currency,
   })
   domainEvents.emit(BookingEvents.confirmed, {
     bookingId: booking.id,
     workspaceId,
     clientEmail: client.email,
     clientName: client.name,
+    clientPhone: client.phone ?? undefined,
     serviceName: service.name,
     startAt,
+    priceCents,
+    currency: workspace.currency,
   })
 
   return booking
@@ -248,13 +283,22 @@ export async function confirmBookingFromPaymentIntent(intentId: string) {
     rawPrisma.booking.update({ where: { id: payment.bookingId }, data: { status: 'confirmed' } }),
   ])
 
+  const flow = await rawPrisma.bookingFlow.findUnique({
+    where: { workspaceId: payment.booking.workspaceId },
+    include: { steps: true },
+  })
+
   domainEvents.emit(BookingEvents.confirmed, {
     bookingId: payment.booking.id,
     workspaceId: payment.booking.workspaceId,
     clientEmail: payment.booking.client.email,
     clientName: payment.booking.client.name,
+    clientPhone: payment.booking.client.phone ?? undefined,
     serviceName: payment.booking.service.name,
     startAt: payment.booking.startAt,
+    priceCents: payment.booking.priceCents,
+    currency: payment.booking.currency,
+    customFields: buildCustomFieldAnswers(flow?.steps ?? [], payment.booking.answers),
   })
 }
 

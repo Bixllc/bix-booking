@@ -151,6 +151,27 @@ export interface BookingFlow {
   steps: FlowStep[]
 }
 
+export type AnalyticsRange = '7d' | '30d' | '90d'
+
+export interface AnalyticsOverview {
+  range: { start: string; end: string; days: number }
+  summary: {
+    totalRevenueCents: number
+    totalBookings: number
+    avgBookingValueCents: number
+    newClients: number
+    revenueChangePct: number | null
+    bookingsChangePct: number | null
+    newClientsChangePct: number | null
+  }
+  revenueTrend: Array<{ date: string; revenueCents: number }>
+  bookingsByStatus: Record<string, number>
+  servicePerformance: Array<{ serviceId: string; name: string; bookings: number; revenueCents: number }>
+  staffPerformance: Array<{ staffId: string; name: string; bookings: number; revenueCents: number }>
+  clientRetention: { newClients: number; returningClients: number; totalActiveClients: number }
+  currency: string
+}
+
 export interface SetupState {
   service: boolean
   flow: boolean

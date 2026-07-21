@@ -13,6 +13,7 @@ import clientsRoutes from './modules/clients/routes.js'
 import availabilityRoutes from './modules/availability/routes.js'
 import bookingsRoutes from './modules/bookings/routes.js'
 import dashboardRoutes from './modules/dashboard/routes.js'
+import analyticsRoutes from './modules/analytics/routes.js'
 import workspaceRoutes from './modules/workspace/routes.js'
 import webhooksRoutes from './modules/webhooks/routes.js'
 
@@ -91,6 +92,7 @@ export function buildApp() {
   app.register(availabilityRoutes)
   app.register(bookingsRoutes)
   app.register(dashboardRoutes)
+  app.register(analyticsRoutes)
   app.register(workspaceRoutes)
   app.register(webhooksRoutes)
 

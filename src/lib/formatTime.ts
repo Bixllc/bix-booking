@@ -27,9 +27,14 @@ export function initialsOf(name: string): string {
 }
 
 export function isSameLocalDate(iso: string, timezone: string, referenceDate = new Date()): boolean {
-  const fmt = (d: Date) =>
-    new Intl.DateTimeFormat('en-CA', { timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(d)
-  return fmt(new Date(iso)) === fmt(referenceDate)
+  return localDateKeyOf(iso, timezone) === localDateKeyOf(referenceDate.toISOString(), timezone)
+}
+
+/** 'YYYY-MM-DD' calendar date of an ISO instant, as observed in `timezone`. */
+export function localDateKeyOf(iso: string, timezone: string): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(
+    new Date(iso),
+  )
 }
 
 export function relativeTime(iso: string): string {

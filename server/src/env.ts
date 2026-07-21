@@ -17,6 +17,16 @@ const envSchema = z.object({
   // are never restricted by this — they're meant to be called from anywhere
   // (embedded booking widgets, Stripe's servers).
   ALLOWED_ORIGINS: z.string().optional(),
+
+  // Optional — when all three are set, notifications go out over WhatsApp via
+  // Twilio instead of just the console. TWILIO_WHATSAPP_FROM is the Twilio
+  // sender (e.g. "whatsapp:+14155238886" for the sandbox, or a verified
+  // WhatsApp Business sender). NOTIFY_WHATSAPP_TO is who gets notified of new
+  // bookings (e.g. "whatsapp:+17215541309").
+  TWILIO_ACCOUNT_SID: z.string().optional(),
+  TWILIO_AUTH_TOKEN: z.string().optional(),
+  TWILIO_WHATSAPP_FROM: z.string().optional(),
+  NOTIFY_WHATSAPP_TO: z.string().optional(),
 })
 
 const parsed = envSchema.safeParse(process.env)

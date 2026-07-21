@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { login as loginRequest, me as meRequest } from '../lib/api/auth'
 import type { AuthUser, AuthWorkspace } from '../lib/api/types'
 import { clearTokens, getAccessToken, setTokens } from '../lib/tokens'
+import { DEMO_USER, DEMO_WORKSPACE } from '../lib/mockData'
 
 interface AuthContextValue {
   user: AuthUser | null
@@ -30,6 +31,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     async function bootstrap() {
       if (!getAccessToken()) {
+        // No API to log into locally — drop into a demo session so the app is browsable.
+        if (import.meta.env.DEV && !cancelled) {
+          setUser(DEMO_USER)
+          setWorkspace(DEMO_WORKSPACE)
+        }
         setIsLoading(false)
         return
       }
@@ -40,7 +46,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setWorkspace(data.workspace)
         }
       } catch {
-        if (!cancelled) clearTokens()
+        if (!cancelled) {
+          clearTokens()
+          if (import.meta.env.DEV) {
+            setUser(DEMO_USER)
+            setWorkspace(DEMO_WORKSPACE)
+          }
+        }
       } finally {
         if (!cancelled) setIsLoading(false)
       }

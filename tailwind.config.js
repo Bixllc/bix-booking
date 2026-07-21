@@ -16,6 +16,27 @@ export default {
         faint: '#b4b4c0',
         gold: '#bf9a42',
         'gold-soft': '#e9ddc0',
+
+        // Marketing landing page palette — namespaced (land-*) to avoid
+        // colliding with the app's own ink/canvas/muted/border tokens above.
+        'land-ink': '#241f33',
+        'land-ink-2': '#3a3448',
+        violet: '#6650e0',
+        'violet-deep': '#5a44c7',
+        'violet-lite': '#7c6ef0',
+        'violet-tint': '#f2eefd',
+        'violet-tint-2': '#f1ecfd',
+        amber: '#bb8b2c',
+        'amber-tint': '#f4ecd8',
+        'amber-card': '#faf4ea',
+        'land-canvas': '#fbfaff',
+        'land-line': '#ece7fa',
+        'land-line-2': '#efeafb',
+        'land-muted': '#57516a',
+        'land-muted-2': '#6a647c',
+        'land-muted-3': '#8a84a0',
+        'land-faint': '#a49dbb',
+        ok: '#22c55e',
       },
       fontFamily: {
         sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
@@ -39,6 +60,15 @@ export default {
         avatar: '10px',
         card: '18px',
         pill: '13px',
+        'land-chip': '13px',
+        'land-card': '20px',
+        'land-panel': '28px',
+        'land-pill': '100px',
+      },
+      maxWidth: {
+        shell: '1200px',
+        hero: '840px',
+        copy: '620px',
       },
       spacing: {
         sidebar: '248px',
@@ -52,9 +82,23 @@ export default {
           from: { transform: 'translateY(9px)', opacity: '0' },
           to: { transform: 'none', opacity: '1' },
         },
+        rise: {
+          from: { transform: 'translateY(20px)', opacity: '0' },
+          to: { transform: 'none', opacity: '1' },
+        },
+        slideUp: {
+          from: { transform: 'translateY(14px)', opacity: '0' },
+          to: { transform: 'none', opacity: '1' },
+        },
+        marq: {
+          to: { transform: 'translateX(-50%)' },
+        },
       },
       animation: {
         scrIn: 'scrIn 0.28s ease',
+        rise: 'rise 0.7s ease both',
+        slideUp: 'slideUp 0.6s ease both',
+        marq: 'marq 28s linear infinite',
       },
     },
   },

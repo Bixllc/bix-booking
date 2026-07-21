@@ -16,6 +16,7 @@ import { Staff } from './pages/Staff'
 import { Settings } from './pages/Settings'
 import { Login } from './pages/Login'
 import { PublicBooking } from './pages/PublicBooking'
+import { Landing } from './pages/Landing'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
@@ -28,12 +29,12 @@ function App() {
         <OnboardingProvider>
           <BrowserRouter>
             <Routes>
+              <Route path="/" element={<Landing />} />
               <Route path="login" element={<Login />} />
               <Route path="book/:slug" element={<PublicBooking />} />
 
               <Route element={<RequireAuth />}>
                 <Route element={<AppShell />}>
-                  <Route index element={<Navigate to="/dashboard" replace />} />
                   <Route path="dashboard" element={<Dashboard />} />
                   <Route path="calendar" element={<Calendar />} />
                   <Route path="clients" element={<Clients />} />

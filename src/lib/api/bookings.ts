@@ -1,4 +1,5 @@
 import { api } from '../apiClient'
+import { MOCK_BOOKINGS } from '../mockData'
 import type { Booking, BookingStatus } from './types'
 
 export interface ListBookingsParams {
@@ -8,14 +9,19 @@ export interface ListBookingsParams {
   status?: BookingStatus
 }
 
-export function listBookings(params: ListBookingsParams = {}) {
+export async function listBookings(params: ListBookingsParams = {}): Promise<{ bookings: Booking[] }> {
   const search = new URLSearchParams()
   if (params.from) search.set('from', params.from)
   if (params.to) search.set('to', params.to)
   if (params.staffId) search.set('staffId', params.staffId)
   if (params.status) search.set('status', params.status)
   const qs = search.toString()
-  return api.get<{ bookings: Booking[] }>(`/bookings${qs ? `?${qs}` : ''}`)
+  try {
+    return await api.get<{ bookings: Booking[] }>(`/bookings${qs ? `?${qs}` : ''}`)
+  } catch (err) {
+    if (import.meta.env.DEV) return { bookings: MOCK_BOOKINGS }
+    throw err
+  }
 }
 
 export function updateBookingStatus(id: string, status: BookingStatus) {
@@ -24,4 +30,8 @@ export function updateBookingStatus(id: string, status: BookingStatus) {
 
 export function cancelBooking(id: string, reason?: string) {
   return api.post<{ booking: Booking }>(`/bookings/${id}/cancel`, { reason })
+}
+
+export function rescheduleBooking(id: string, input: { startAt: string; staffId?: string }) {
+  return api.post<{ booking: Booking }>(`/bookings/${id}/reschedule`, input)
 }

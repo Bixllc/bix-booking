@@ -1,9 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   cancelBooking,
+  createBooking,
   listBookings,
   rescheduleBooking,
   updateBookingStatus,
+  type CreateBookingInput,
   type ListBookingsParams,
 } from '../lib/api/bookings'
 import type { BookingStatus } from '../lib/api/types'
@@ -38,6 +40,14 @@ export function useCancelBooking() {
   const invalidate = useInvalidateBookings()
   return useMutation({
     mutationFn: ({ id, reason }: { id: string; reason?: string }) => cancelBooking(id, reason),
+    onSuccess: invalidate,
+  })
+}
+
+export function useCreateBooking() {
+  const invalidate = useInvalidateBookings()
+  return useMutation({
+    mutationFn: (input: CreateBookingInput) => createBooking(input),
     onSuccess: invalidate,
   })
 }

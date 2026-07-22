@@ -7,8 +7,8 @@ export function WelcomeModal() {
   if (!welcomeOpen) return null
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 backdrop-blur-[2px] p-4">
-      <div className="w-full max-w-md rounded-card bg-surface p-6 sm:p-8 text-center animate-scrIn shadow-2xl">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 backdrop-blur-[2px] p-4 overflow-y-auto">
+      <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-card bg-surface p-6 sm:p-8 text-center animate-scrIn shadow-2xl my-auto">
         <div className="mx-auto mb-6 size-16 rounded-card bg-ink-grad flex items-center justify-center">
           <BixMark size={30} className="text-indigo-400" />
         </div>

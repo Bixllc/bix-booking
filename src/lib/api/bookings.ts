@@ -35,3 +35,16 @@ export function cancelBooking(id: string, reason?: string) {
 export function rescheduleBooking(id: string, input: { startAt: string; staffId?: string }) {
   return api.post<{ booking: Booking }>(`/bookings/${id}/reschedule`, input)
 }
+
+export interface CreateBookingInput {
+  serviceId: string
+  staffId: string
+  startAt: string
+  addOnIds?: string[]
+  clientId?: string
+  customer?: { name: string; email: string; phone?: string }
+}
+
+export function createBooking(input: CreateBookingInput) {
+  return api.post<{ booking: Booking }>('/bookings', input)
+}

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Car, Ship, Sparkles, Clock3, Plus, MoreHorizontal } from 'lucide-react'
+import { Car, Ship, Sparkles, Clock3, Plus } from 'lucide-react'
 import { useCreateService, useServices, useUpdateService } from '../hooks/useServices'
 import { formatCents } from '../lib/formatTime'
 import { Modal } from '../components/ui/Modal'
@@ -74,13 +74,8 @@ export function Services() {
           const Icon = iconFor(s.category)
           return (
             <div key={s.id} className="rounded-card bg-surface border border-border p-5 flex flex-col gap-4 animate-scrIn">
-              <div className="flex items-start justify-between">
-                <div className="size-10 rounded-avatar bg-canvas border border-border flex items-center justify-center">
-                  <Icon size={18} strokeWidth={1.7} className="text-gold" />
-                </div>
-                <button type="button" className="text-faint hover:text-muted transition" aria-label="More options">
-                  <MoreHorizontal size={18} strokeWidth={1.7} />
-                </button>
+              <div className="size-10 rounded-avatar bg-canvas border border-border flex items-center justify-center">
+                <Icon size={18} strokeWidth={1.7} className="text-gold" />
               </div>
 
               <div>

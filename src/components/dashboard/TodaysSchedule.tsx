@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import type { Booking } from '../../lib/api/types'
 import { formatCents, initialsOf, splitTimeInZone } from '../../lib/formatTime'
 
@@ -26,7 +26,7 @@ interface TodaysScheduleProps {
 }
 
 export function TodaysSchedule({ bookings, timezone, currency, isLoading }: TodaysScheduleProps) {
-  const [staffFilter, setStaffFilter] = useState<'all' | 'mine'>('all')
+  const navigate = useNavigate()
 
   return (
     <div className="rounded-card bg-surface border border-border p-4 sm:p-5 animate-scrIn">
@@ -35,15 +35,9 @@ export function TodaysSchedule({ bookings, timezone, currency, isLoading }: Toda
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setStaffFilter('all')}
-            className={[
-              'rounded-btn px-3 py-1.5 text-label font-medium transition',
-              staffFilter === 'all' ? 'bg-ink text-white' : 'border border-border text-ink hover:bg-canvas',
-            ].join(' ')}
+            onClick={() => navigate('/calendar')}
+            className="rounded-btn border border-border px-3 py-1.5 text-label font-medium text-ink hover:bg-canvas transition"
           >
-            All staff
-          </button>
-          <button type="button" className="rounded-btn border border-border px-3 py-1.5 text-label font-medium text-ink hover:bg-canvas transition">
             Open calendar
           </button>
         </div>

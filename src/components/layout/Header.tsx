@@ -1,3 +1,5 @@
+import { useState, type FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Menu, Plus, Search } from 'lucide-react'
 import { useOnboarding } from '../../context/OnboardingContext'
 import { useAuth } from '../../context/AuthContext'
@@ -19,6 +21,8 @@ export function Header({ onNewBooking }: HeaderProps) {
   const { openMobileNav } = useOnboarding()
   const { user } = useAuth()
   const { data: stats } = useDashboardStats()
+  const navigate = useNavigate()
+  const [search, setSearch] = useState('')
   const dateLabel = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
     month: 'long',
@@ -26,6 +30,11 @@ export function Header({ onNewBooking }: HeaderProps) {
   })
 
   const firstName = user?.name.split(' ')[0] ?? ''
+
+  function submitSearch(e: FormEvent) {
+    e.preventDefault()
+    navigate(search.trim() ? `/clients?q=${encodeURIComponent(search.trim())}` : '/clients')
+  }
 
   return (
     <header className="h-header shrink-0 bg-surface border-b border-border flex items-center gap-3 sm:gap-6 px-4 sm:px-6 lg:px-8">
@@ -49,21 +58,24 @@ export function Header({ onNewBooking }: HeaderProps) {
       </div>
 
       <div className="flex-1 flex justify-end items-center gap-2 sm:gap-3">
-        <div className="hidden md:flex w-full max-w-[340px] items-center gap-2 rounded-field border border-border bg-canvas px-3.5 py-2.5 text-muted">
+        <form
+          onSubmit={submitSearch}
+          className="hidden md:flex w-full max-w-[340px] items-center gap-2 rounded-field border border-border bg-canvas px-3.5 py-2.5 text-muted focus-within:border-gold transition"
+        >
           <Search size={16} strokeWidth={1.7} />
           <input
             type="text"
-            placeholder="Search clients, bookings..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search clients..."
             className="flex-1 min-w-0 bg-transparent text-body text-ink placeholder:text-faint outline-none"
           />
-          <span className="shrink-0 rounded-kbd border border-border-2 bg-surface px-1.5 py-0.5 text-kbd font-mono text-faint">
-            ⌘K
-          </span>
-        </div>
+        </form>
 
         <button
           type="button"
-          aria-label="Search"
+          onClick={() => navigate('/clients')}
+          aria-label="Search clients"
           className="md:hidden shrink-0 rounded-btn border border-border p-2.5 text-muted hover:bg-canvas transition"
         >
           <Search size={17} strokeWidth={1.7} />

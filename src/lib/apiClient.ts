@@ -15,6 +15,14 @@ export class ApiError extends Error {
   }
 }
 
+// The API runs on a Render free-tier instance that spins down after idling
+// and can take 30-60s+ to wake back up. Firing this as early as possible
+// (before the user has finished reading the login form) hides most of that
+// cold-start latency behind normal page-load time.
+export function warmUpApi(): void {
+  fetch(`${API_URL}/health`).catch(() => {})
+}
+
 let refreshPromise: Promise<string | null> | null = null
 
 async function refreshAccessToken(): Promise<string | null> {

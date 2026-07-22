@@ -1,11 +1,13 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Search, Users } from 'lucide-react'
 import { useClients } from '../hooks/useClients'
 import { initialsOf } from '../lib/formatTime'
 import { colorForId } from '../lib/colors'
 
 export function Clients() {
-  const [query, setQuery] = useState('')
+  const [searchParams] = useSearchParams()
+  const [query, setQuery] = useState(() => searchParams.get('q') ?? '')
   const { data, isLoading } = useClients(query.trim() || undefined)
   const clients = data?.clients ?? []
 

@@ -46,9 +46,6 @@ export function Payments() {
               <div className="text-[11.5px] text-muted">Payout account</div>
             </div>
           </div>
-          <button type="button" className="rounded-btn border border-border py-2 text-label font-medium text-ink hover:bg-canvas transition">
-            Manage payouts
-          </button>
         </div>
       </div>
 

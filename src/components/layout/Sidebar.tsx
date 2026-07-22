@@ -5,7 +5,11 @@ import { navGroups } from '../../lib/nav'
 import { useOnboarding } from '../../context/OnboardingContext'
 import { useAuth } from '../../context/AuthContext'
 
-export function Sidebar() {
+interface SidebarProps {
+  onNewBooking: () => void
+}
+
+export function Sidebar({ onNewBooking }: SidebarProps) {
   const { currentStep, tourActive, mobileNavOpen, closeMobileNav } = useOnboarding()
   const { workspace, logout } = useAuth()
   const navigate = useNavigate()
@@ -80,6 +84,10 @@ export function Sidebar() {
       <div className="px-3 pb-4 flex flex-col gap-3">
         <button
           type="button"
+          onClick={() => {
+            closeMobileNav()
+            onNewBooking()
+          }}
           className="flex items-center justify-center gap-2 rounded-btn border border-gold-soft text-gold bg-surface px-3 py-2.5 text-label font-semibold hover:brightness-[.97] transition"
         >
           <Plus size={16} strokeWidth={2} />
